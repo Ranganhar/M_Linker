@@ -112,6 +112,9 @@
     "streambuf": "cpp",
     "thread": "cpp",
     "typeinfo": "cpp",
-    "__nullptr": "cpp"
+    "__nullptr": "cpp",
+    "utils.h": "c",
+    "elf.hpp": "c",
+    "file.h": "c"
   }
 }
