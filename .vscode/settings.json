@@ -115,6 +115,7 @@
     "__nullptr": "cpp",
     "utils.h": "c",
     "elf.hpp": "c",
-    "file.h": "c"
+    "file.h": "c",
+    "elf.h": "c"
   }
 }
