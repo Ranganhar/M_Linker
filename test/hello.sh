@@ -16,5 +16,5 @@ int main(void)
 
 EOF
 
-riscv64-linux-gnu-gcc -B. -static "$t"/a.o -o "$t"/out
-# ./linker  "$t"/a.o
+# riscv64-linux-gnu-gcc -B. -static "$t"/a.o -o "$t"/out
+./ld  "$t"/a.o

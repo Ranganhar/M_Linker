@@ -19,5 +19,6 @@ class Context
         } emulation;
         std::string output;
         std::vector<std::string> lib_path;
+        std::vector<std::string> wait_handle;
     } args;
 };

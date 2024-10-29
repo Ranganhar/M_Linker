@@ -12,9 +12,11 @@ class File
   public:
     char *name;
     std::ifstream file;
-    File(char *file_name) : name(file_name), file(file_name, std::ios::binary)
+    Context* ctx;
+    File(char *file_name, Context* ctx_) : name(file_name), file(file_name, std::ios::binary), ctx(ctx_)
     {
         fatal::m_assert(file.is_open(), "Could not open this file when initializing class File!");
+
         check_ELF();
         check_size();
         read_elf_header();
@@ -26,13 +28,20 @@ class File
     Elf_Header *elf_header;
     std::vector<Shdr *> elf_sections;
     std::vector<uint8_t> Shstr_table;
-
+    enum
+    {
+      Unknown,
+      Empty,
+      Object
+    } fileType;
   private:
     void check_ELF();
     void check_size();
     void read_elf_header();
     void read_section_headers();
     void read_Shstr_table();
+    void check_file_type();
+    void get_machine_type();
     Shdr *read_section_header(size_t offset);
 
   public:
@@ -49,7 +58,7 @@ class File
 class ObjectFile : public File
 {
   public:
-    ObjectFile(char *file_name) : File(file_name)
+    ObjectFile(char *file_name, Context* ctx) : File(file_name, ctx)
     {
         symbol_table_section = get_section_from_type(this, (uint32_t)SHT_SYMTAB);
         get_first_global();

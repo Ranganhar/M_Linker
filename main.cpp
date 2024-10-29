@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     Context* ctx = new Context();
     parse::parseArgs(argc, argv, ctx);
 
-    ObjectFile* file = new ObjectFile(argv[1]);
+    File* file = new File(argv[1], ctx);
     if(!file)
     {
         std::cerr << "Failed to create file object!" << std::endl;

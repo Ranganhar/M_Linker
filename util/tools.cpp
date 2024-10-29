@@ -88,7 +88,7 @@ void parseArgs(int argc, char *argv[], Context *ctx)
         read_arg("hash-style") || read_flag("as-needed") || read_flag("static") || read_arg("z") || read_flag("start-group")
         || read_arg("end-group"))
         {
-
+            // TODO
         }
         else
         {
@@ -96,39 +96,6 @@ void parseArgs(int argc, char *argv[], Context *ctx)
         }
         iter = args.erase(iter);
     }
-
-    auto parse_machineType_from_file = [&]()
-    {
-        for(size_t i = 0; i < wait_handle.size(); i++)
-        {
-            if(wait_handle[i][0] == '-')
-                continue;
-            {
-                std::ifstream file(wait_handle[i]);
-                fatal::m_assert(file.is_open(), "failed to open file!");
-                file.seekg(16, std::ios::beg);
-                fatal::m_assert(file.good(), "failed to seekg the file!");
-                uint16_t type;
-                file.read(reinterpret_cast<char*>(&type), sizeof(type));
-                if(type != (uint16_t)ET_REL)
-                    continue;
-                file.seekg(18, std::ios::beg);
-                uint16_t machine_type;
-                file.read(reinterpret_cast<char*>(&machine_type), sizeof(machine_type));
-                if(machine_type == (uint16_t)EM_RISCV)
-                {
-                    ctx->args.emulation = Context::Args::MachineTypeRISCV64;
-                    return Context::Args::MachineTypeRISCV64;
-                }
-            }
-        }
-        return Context::Args::MachineTypeNone;
-    };
-
-    if(ctx->args.emulation != Context::Args::MachineTypeRISCV64)
-    {
-        if(parse_machineType_from_file() != Context::Args::MachineTypeRISCV64)
-            fatal::m_assert(false, "no machine type specified!");
-    }
+    ctx->args.wait_handle = wait_handle;
 };
 } // namespace parse

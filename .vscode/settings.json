@@ -116,6 +116,8 @@
     "utils.h": "c",
     "elf.hpp": "c",
     "file.h": "c",
-    "elf.h": "c"
+    "elf.h": "c",
+    "set": "cpp",
+    "fstream": "cpp"
   }
 }

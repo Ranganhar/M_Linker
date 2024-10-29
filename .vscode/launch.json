@@ -5,11 +5,11 @@
       "name": "C/C++ Runner: Debug Session",
       "type": "cppdbg",
       "request": "launch",
-      "args": ["${workspaceFolder}/test.o"],
+      "args": ["${workspaceFolder}/out/tests/hellp/a.o"],
       "stopAtEntry": true,
       "externalConsole": false,
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/test",
+      "program": "${workspaceFolder}/ld",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
