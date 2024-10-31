@@ -1,15 +1,16 @@
 #include "../include/file.hpp"
 #include "../include/context.hpp"
 #include "../util/tools.hpp"
+#include <cstring>
 #include <elf.h>
 
-void File::check_ELF()
+void File::init()
 {
-    char buffer[8] = {0};
-
-    file.read(buffer, 8);
-    fatal::m_assert(buffer[0] == 0x7f && buffer[1] == 'E' && buffer[2] == 'L' && buffer[3] == 'F',
-                    "This is not an ELF file!");
+    fatal::m_assert(file.is_open(), "Could not open this file when initializing class File!");
+    check_size();
+    read_elf_header();
+    read_section_headers();
+    read_Shstr_table();
 }
 
 void File::check_size()
@@ -131,66 +132,6 @@ void File::read_Shstr_table()
     Shstr_table = get_section_content_byte((uint64_t)get_ShstrIdx());
 }
 
-void File::check_file_type()
-{
-    fatal::m_assert(file.is_open(), "Could not open the file when check the file type!");
-    if(file.seekg(0, std::ios::end).good())
-    {
-        fileType = Empty;
-        return;
-    }
-    
-    file.seekg(sizeof(elf_header->ident), std::ios::beg);
-    fatal::m_assert(file.good(), "Failed to seek the specified offset when checking the file type!");
-
-    uint16_t type;
-    file.read(reinterpret_cast<char*>(&type), sizeof(elf_header->type));
-    if(type == ET_REL)
-    {
-        fileType = Object;
-        get_machine_type();
-    }
-    else
-        fileType = Unknown;
-    
-}
-
-void File::get_machine_type()
-{
-    auto parse_machineType_from_file = [&]() {
-        for (size_t i = 0; i < ctx->args.wait_handle.size(); i++)
-        {
-            if (ctx->args.wait_handle[i][0] == '-')
-                continue;
-            {
-                std::ifstream file(ctx->args.wait_handle[i]);
-                fatal::m_assert(file.is_open(), "failed to open file!");
-                file.seekg(16, std::ios::beg);
-                fatal::m_assert(file.good(), "failed to seekg the file!");
-                uint16_t type;
-                file.read(reinterpret_cast<char *>(&type), sizeof(type));
-                if (type != (uint16_t)ET_REL)
-                    continue;
-                file.seekg(18, std::ios::beg);
-                uint16_t machine_type;
-                file.read(reinterpret_cast<char *>(&machine_type), sizeof(machine_type));
-                if (machine_type == (uint16_t)EM_RISCV)
-                {
-                    ctx->args.emulation = Context::Args::MachineTypeRISCV64;
-                    return Context::Args::MachineTypeRISCV64;
-                }
-            }
-        }
-        return Context::Args::MachineTypeNone;
-    };
-
-    if (ctx->args.emulation != Context::Args::MachineTypeRISCV64)
-    {
-        if (parse_machineType_from_file() != Context::Args::MachineTypeRISCV64)
-            fatal::m_assert(false, "no machine type specified!");
-    }
-}
-
 void ObjectFile::read_elf_symbols()
 {
     std::vector<uint8_t> bytes = get_bytes_from_Shdr(symbol_table_section);
@@ -217,4 +158,12 @@ void ObjectFile::read_symbol_string_table()
     symbol_string_table = get_section_content_byte((uint64_t)symbol_table_section->link);
     for (size_t i = 0; i < elf_symbols.size(); i++)
         std::cout << get_section_name(symbol_string_table, elf_symbols[i]->name) << std::endl;
+}
+
+void ObjectFile::Obj_init()
+{
+    symbol_table_section = get_section_from_type(this, (uint32_t)SHT_SYMTAB);
+    get_first_global();
+    read_elf_symbols();
+    read_symbol_string_table();
 }

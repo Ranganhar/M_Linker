@@ -23,3 +23,35 @@ Shdr *get_section_from_type(File *file, uint32_t type)
     }
     return nullptr;
 }
+
+bool is_arch_string_table(Arch_Header *header)
+{
+    std::string name(header->name, 10);
+    name.erase(std::remove(name.begin(), name.end(), ' '), name.end());
+    return name.substr(0, 3) == "// ";
+}
+
+bool is_arch_symbol_table(Arch_Header *header)
+{
+    std::string name(header->name, 10);
+    name.erase(std::remove(name.begin(), name.end(), ' '), name.end());
+    return (name.substr(0, 2) == "/ ") || (name.substr(0, 6) == "/SYM/ ");
+}
+
+std::string get_arch_name(Arch_Header *header, std::string string_table)
+{
+    std::string name(header->name, 10);
+    name.erase(std::remove(name.begin(), name.end(), ' '), name.end());
+    if (name.substr(0, 1) == "/")
+    {
+        name.erase(name.begin());
+        auto start = string_table.find(name);
+        auto end = string_table.find("/\n", start);
+        return string_table.substr(start, end - start);
+    }
+
+    size_t pos = name.find('/');
+    if (pos != std::string::npos)
+        return name.substr(0, pos);
+    return name;
+}

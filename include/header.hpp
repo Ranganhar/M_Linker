@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 class File;
 
@@ -46,7 +47,7 @@ constexpr size_t Section_Header_size = sizeof(Shdr);
 
 std::string get_section_name(std::vector<uint8_t> content, uint32_t offset);
 
-Shdr* get_section_from_type(File* file, uint32_t type);
+Shdr *get_section_from_type(File *file, uint32_t type);
 
 /* Symbol */
 
@@ -61,3 +62,22 @@ typedef struct Symbol
 } symbol;
 
 constexpr size_t symbol_size = sizeof(symbol);
+
+typedef struct Arch_Header
+{
+    char name[16];
+    char data[12];
+    char uid[6];
+    char gid[6];
+    char mode[8];
+    char size[10];
+    char fmag[2];
+} Arhdr;
+
+constexpr size_t Arch_Header_size = sizeof(Arhdr);
+
+bool is_arch_string_table(Arch_Header *header);
+
+bool is_arch_symbol_table(Arch_Header *header);
+
+std::string get_arch_name(Arch_Header *header, std::string string_table);

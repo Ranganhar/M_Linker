@@ -8,15 +8,14 @@
 int main(int argc, char *argv[])
 {
 
-    Context* ctx = new Context();
+    Context* ctx = new Context(argv[1]);
     parse::parseArgs(argc, argv, ctx);
-
-    File* file = new File(argv[1], ctx);
-    if(!file)
-    {
-        std::cerr << "Failed to create file object!" << std::endl;
-        exit(1);
-    }
+    
+    // if(!file)
+    // {
+    //     std::cerr << "Failed to create file object!" << std::endl;
+    //     exit(1);
+    // }
 
     // auto index_content = file->get_section_content_byte(file->get_ShstrIdx());
 

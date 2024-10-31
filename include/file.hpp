@@ -10,38 +10,34 @@
 class File
 {
   public:
-    char *name;
     std::ifstream file;
-    Context* ctx;
-    File(char *file_name, Context* ctx_) : name(file_name), file(file_name, std::ios::binary), ctx(ctx_)
+    std::string name;
+    File *parent;
+    File(std::ifstream &&f) : file(std::move(f)), name(""), parent(nullptr)
     {
-        fatal::m_assert(file.is_open(), "Could not open this file when initializing class File!");
-
-        check_ELF();
-        check_size();
-        read_elf_header();
-        read_section_headers();
-        read_Shstr_table();
+        init();
+    }
+    File(std::ifstream &&f, std::string n) : file(std::move(f)), name(n), parent(nullptr)
+    {
+        init();
+    }
+    File(std::ifstream &&f, std::string n, File *parent) : file(std::move(f)), name(n), parent(parent)
+    {
+        init();
     }
 
   public:
     Elf_Header *elf_header;
     std::vector<Shdr *> elf_sections;
     std::vector<uint8_t> Shstr_table;
-    enum
-    {
-      Unknown,
-      Empty,
-      Object
-    } fileType;
+
   private:
-    void check_ELF();
+    void init();
     void check_size();
     void read_elf_header();
     void read_section_headers();
     void read_Shstr_table();
     void check_file_type();
-    void get_machine_type();
     Shdr *read_section_header(size_t offset);
 
   public:
@@ -58,12 +54,17 @@ class File
 class ObjectFile : public File
 {
   public:
-    ObjectFile(char *file_name, Context* ctx) : File(file_name, ctx)
+    ObjectFile(std::ifstream &&f) : File(std::move(f))
     {
-        symbol_table_section = get_section_from_type(this, (uint32_t)SHT_SYMTAB);
-        get_first_global();
-        read_elf_symbols();
-        read_symbol_string_table();
+        Obj_init();
+    }
+    ObjectFile(std::ifstream &&f, std::string n) : File(std::move(f), n)
+    {
+        Obj_init();
+    }
+    ObjectFile(std::ifstream &&f, std::string n, File *parent) : File(std::move(f), n, parent)
+    {
+        Obj_init();
     }
     uint64_t first_global_symbol;
     Shdr *symbol_table_section;
@@ -71,8 +72,9 @@ class ObjectFile : public File
     std::vector<uint8_t> symbol_string_table;
 
   private:
+    void Obj_init();
     void get_first_global();
     void read_elf_symbols();
     void read_symbol_string_table();
-    symbol* read_single_symbol(std::vector<uint8_t> bytes, size_t offset);
+    symbol *read_single_symbol(std::vector<uint8_t> bytes, size_t offset);
 };
