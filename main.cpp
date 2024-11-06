@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 
     Context* ctx = new Context(argv[1]);
     parse::parseArgs(argc, argv, ctx);
-    
+    ctx->init();
     // if(!file)
     // {
     //     std::cerr << "Failed to create file object!" << std::endl;
